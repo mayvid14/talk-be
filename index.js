@@ -4,8 +4,24 @@ const fs = require('fs');
 const _ = require('lodash');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fileType = require('file-type');
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
 const db = require('./db/functions');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dirPath = path.join(__dirname, ..._.get(config, "PROFILES", ["..", "profiles"]));
+        console.log(`dirpath is ${dirPath}`);
+        return cb(null, dirPath);
+    },
+
+    filename: (req, file, cb) => {
+        return cb(null, Date.now() + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
 
 const port = _.get(config, "PORT", 8080);
 
@@ -21,19 +37,24 @@ app.use(bodyParser.urlencoded({
 
 io.on('connection', function (socket) {
     console.log('a user connected');
+
+    socket.on('new user', (user) => {
+        io.emit('new user', user);
+    });
+
     socket.on('disconnect', function () {
         console.log('user disconnected');
     });
 });
 
-app.post('/signup', (req, res) => {
+app.post('/signup', upload.single('profile'), (req, res) => {
     bcrypt.genSalt((err, salt) => {
         if (err) res.sendStatus(500);
         bcrypt.hash(_.get(req, ["body", "password"], ""), salt, (error, hash) => {
             if (error) res.sendStatus(500);
             const username = _.get(req, ["body", "username"], "");
-            const profile = _.get(req, ["body", "profile"], "");
-            console.log(`Adding user ${username}`);
+            const profile = _.get(req, ["file", "path"], "");
+            console.log(`Adding user ${username},${req.file}`);
             db.addNewUser(username, hash, profile, res);
         });
     });
@@ -53,6 +74,16 @@ app.post('/login', (req, res) => {
         valid ? res.send(u) : res.sendStatus(404);
     }).catch(err => {
         res.sendStatus(500);
+    });
+});
+
+app.get('/image/:path', (req, res) => {
+    const path = decodeURI(_.get(req, ["params", "path"], ""));
+    fs.readFile(path, (err, data) => {
+        if (err) res.sendStatus(500);
+        res.contentType(fileType(data).mime);
+        console.log(fileType(data).mime);
+        res.send(data);
     });
 });
 

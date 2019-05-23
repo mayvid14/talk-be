@@ -1,5 +1,9 @@
 {
     "PORT": 2810,
     "DB_PATH": "mongodb://127.0.0.1:27017",
-    "DB_NAME": "talk"
+    "DB_NAME": "talk",
+    "PROFILES": [
+        "..",
+        "profiles"
+    ]
 }
