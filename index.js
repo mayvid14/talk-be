@@ -35,15 +35,25 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 
+let users = 0;
 io.on('connection', function (socket) {
-    console.log('a user connected');
+    users++;
+    console.log('a user connected. Users =', users);
 
     socket.on('new user', (user) => {
         io.emit('new user', user);
     });
 
+    socket.on('new message', message => {
+        db.addNewMessage(message.sentBy._id, message.sentAt, message.content, message.attachment).then(data => {
+            console.log(data.sentBy.username,':',data.content);
+            io.emit('message', data);
+        }).catch(console.error);
+    });
+
     socket.on('disconnect', function () {
-        console.log('user disconnected');
+        users--;
+        console.log('a user disconnected. Users =', users);
     });
 });
 

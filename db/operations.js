@@ -1,4 +1,5 @@
 const user = require('./userSchema');
+const msg = require('./messageSchema');
 
 module.exports = {
     addUser: obj => {
@@ -9,5 +10,10 @@ module.exports = {
     findUserByUsername: username => {
         console.log(username);
         return user.findOne({username}).exec();
+    },
+
+    addMessage: obj => {
+        const newMsg = new msg(obj);
+        return newMsg.save().then(e => e.populate('sentBy').execPopulate());
     }
 };

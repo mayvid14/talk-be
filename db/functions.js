@@ -3,7 +3,7 @@ const _ = require("lodash");
 
 module.exports = {
     addNewUser: (username, password, profile, res) => {
-        const obj = {username, password, profile};
+        const obj = { username, password, profile };
         const p = operations.addUser(obj);
 
         p.then(data => {
@@ -16,5 +16,10 @@ module.exports = {
 
     getUserByUsername: (username) => {
         return operations.findUserByUsername(username);
+    },
+
+    addNewMessage: (sentBy, sentAt, content, attachment) => {
+        const obj = attachment ? { sentBy, sentAt, content, attachment } : { sentBy, sentAt, content };
+        return operations.addMessage(obj);
     }
 };
