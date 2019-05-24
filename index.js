@@ -47,7 +47,7 @@ io.on('connection', function (socket) {
     socket.on('new message', message => {
         db.addNewMessage(message.sentBy._id, message.sentAt, message.content, message.attachment).then(data => {
             console.log(data.sentBy.username,':',data.content);
-            io.emit('message', data);
+            io.emit('new message', data);
         }).catch(console.error);
     });
 
