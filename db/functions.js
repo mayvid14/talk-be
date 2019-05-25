@@ -21,5 +21,11 @@ module.exports = {
     addNewMessage: (sentBy, sentAt, content, attachment) => {
         const obj = attachment ? { sentBy, sentAt, content, attachment } : { sentBy, sentAt, content };
         return operations.addMessage(obj);
-    }
+    },
+
+    changePassword: (username, password) => {
+        return operations.updatePassword(username, password);
+    },
+
+    populateFeed: () => operations.getLast50Messages()
 };

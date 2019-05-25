@@ -1,5 +1,4 @@
 const object = require('./object');
-const User = require('./userSchema');
 
 const messageSchema = new object.mongoose.Schema({
     sentBy: {
